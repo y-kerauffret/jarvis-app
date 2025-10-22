@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS – Assistant IA</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0a0a0a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #app {
+      width: 90%;
+      max-width: 400px;
+      background-color: #1b1b1b;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+      text-align: center;
+      position: relative;
+    }
+
+    #chat {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      background-color: #111;
+      margin-bottom: 15px;
+      box-shadow: inset 0 0 25px rgba(255, 100, 0, 0.2);
+    }
+
+    #logo {
+      width: 250px;
+      border-radius: 12px;
+      animation: reactorGlow 2.5s infinite ease-in-out;
+    }
+
+    @keyframes reactorGlow {
+      0% {
+        box-shadow: 
+          0 0 25px rgba(255, 120, 0, 0.8),
+          0 0 60px rgba(255, 80, 0, 0.5),
+          0 0 120px rgba(255, 40, 0, 0.2);
+      }
+      50% {
+        box-shadow: 
+          0 0 40px rgba(255, 160, 0, 1),
+          0 0 90px rgba(255, 120, 0, 0.8),
+          0 0 150px rgba(255, 60, 0, 0.4);
+      }
+      100% {
+        box-shadow: 
+          0 0 25px rgba(255, 120, 0, 0.8),
+          0 0 60px rgba(255, 80, 0, 0.5),
+          0 0 120px rgba(255, 40, 0, 0.2);
+      }
+    }
+
+    #history {
+      background-color: #0e0e0e;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+      color: #ccc;
+      min-height: 60px;
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      box-shadow: inset 0 0 10px rgba(255, 100, 0, 0.2);
+      scroll-behavior: smooth;
+    }
+
+    .user { color: #ffb347; font-weight: bold; }
+    .bot { color: #66ccff; }
+
+    #input-zone {
+      display: flex;
+      gap: 10px;
+    }
+
+    #userInput {
+      flex-grow: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    #sendBtn {
+      background-color: #d4a017;
+      color: black;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    #sendBtn:hover {
+      background-color: #ffcc33;
+      transform: scale(1.05);
+    }
+
+    /* Copyright */
+    #footer {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+      opacity: 0.8;
+    }
+    #footer span {
+      color: #d4a017;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="chat">
+      <img id="logo" src="icon.png" alt="Logo JARVIS">
+    </div>
+
+    <div id="history"></div>
+
+    <div id="input-zone">
+      <input type="text" id="userInput" placeholder="Écris ta commande...">
+      <button id="sendBtn">Envoyer</button>
+    </div>
+
+    <div id="footer">© <span>JARVIS</span> — Design by YK</div>
+  </div>
+
+  <script>
+    const input = document.getElementById("userInput");
+    const btn = document.getElementById("sendBtn");
+    const history = document.getElementById("history");
+    let exchanges = [];
+
+    // 🔗 Webhook N8N
+    const WEBHOOK_URL = "https://n8n.srv846378.hstgr.cloud/webhook/77a6a624-93e6-463e-a1f4-5185239570e2";
+
+    async function sendToJarvis(message) {
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        return data.reply || "Réponse vide reçue du serveur N8N.";
+      } catch {
+        return "Erreur de connexion à N8N.";
+      }
+    }
+
+    function updateHistory() {
+      history.innerHTML = exchanges.map(e => `
+        <p><span class="user">🧑 ${e.user}</span><br>
+        <span class="bot">🤖 ${e.bot}</span></p>
+      `).join("");
+      history.scrollTop = history.scrollHeight;
+    }
+
+    async function typeText(index, text) {
+      exchanges[index].bot = "";
+      for (let i = 0; i < text.length; i++) {
+        exchanges[index].bot += text[i];
+        updateHistory();
+        await new Promise(resolve => setTimeout(resolve, 25));
+      }
+    }
+
+    btn.addEventListener("click", async () => {
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+
+      exchanges.push({ user: text, bot: "" });
+      if (exchanges.length > 2) exchanges = exchanges.slice(-2);
+      updateHistory();
+
+      const reply = await sendToJarvis(text);
+      const index = exchanges.length - 1;
+      await typeText(index, reply);
+    });
+
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") btn.click();
+    });
+  </script>
+</body>
+</html>
