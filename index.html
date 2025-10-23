@@ -23,7 +23,7 @@
       background-color: #1b1b1b;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+      box-shadow: 0 0 30px rgba(255, 140, 0, 0.4);
       text-align: center;
       position: relative;
     }
@@ -37,7 +37,7 @@
       border-radius: 10px;
       background-color: #111;
       margin-bottom: 15px;
-      box-shadow: inset 0 0 25px rgba(255, 100, 0, 0.2);
+      box-shadow: inset 0 0 40px rgba(255, 100, 0, 0.35);
     }
 
     #logo {
@@ -48,22 +48,22 @@
 
     @keyframes reactorGlow {
       0% {
-        box-shadow: 
-          0 0 25px rgba(255, 120, 0, 0.8),
-          0 0 60px rgba(255, 80, 0, 0.5),
-          0 0 120px rgba(255, 40, 0, 0.2);
+        box-shadow:
+          0 0 40px rgba(255, 160, 0, 0.9),
+          0 0 80px rgba(255, 120, 0, 0.7),
+          0 0 160px rgba(255, 60, 0, 0.4);
       }
       50% {
-        box-shadow: 
-          0 0 40px rgba(255, 160, 0, 1),
-          0 0 90px rgba(255, 120, 0, 0.8),
-          0 0 150px rgba(255, 60, 0, 0.4);
+        box-shadow:
+          0 0 70px rgba(255, 200, 0, 1),
+          0 0 120px rgba(255, 100, 0, 0.9),
+          0 0 200px rgba(255, 40, 0, 0.5);
       }
       100% {
-        box-shadow: 
-          0 0 25px rgba(255, 120, 0, 0.8),
-          0 0 60px rgba(255, 80, 0, 0.5),
-          0 0 120px rgba(255, 40, 0, 0.2);
+        box-shadow:
+          0 0 40px rgba(255, 160, 0, 0.9),
+          0 0 80px rgba(255, 120, 0, 0.7),
+          0 0 160px rgba(255, 60, 0, 0.4);
       }
     }
 
@@ -78,7 +78,7 @@
       max-height: 120px;
       overflow-y: auto;
       margin-bottom: 15px;
-      box-shadow: inset 0 0 10px rgba(255, 100, 0, 0.2);
+      box-shadow: inset 0 0 15px rgba(255, 100, 0, 0.25);
       scroll-behavior: smooth;
     }
 
@@ -88,6 +88,7 @@
     #input-zone {
       display: flex;
       gap: 10px;
+      align-items: center;
     }
 
     #userInput {
@@ -96,22 +97,25 @@
       border: none;
       border-radius: 6px;
       outline: none;
+      resize: none;
+      height: 60px;
+      font-size: 14px;
     }
 
     #sendBtn {
-      background-color: #d4a017;
-      color: black;
+      background: radial-gradient(circle at center, #ffd700 30%, #cc0000 100%);
       border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
       cursor: pointer;
-      font-weight: bold;
       transition: all 0.2s;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
     }
 
     #sendBtn:hover {
-      background-color: #ffcc33;
-      transform: scale(1.05);
+      transform: scale(1.1);
+      box-shadow: 0 0 35px rgba(255, 0, 0, 0.8);
     }
 
     /* Copyright */
@@ -136,8 +140,8 @@
     <div id="history"></div>
 
     <div id="input-zone">
-      <input type="text" id="userInput" placeholder="Écris ta commande...">
-      <button id="sendBtn">Envoyer</button>
+      <textarea id="userInput" rows="3" placeholder="Salut Yannick"></textarea>
+      <button id="sendBtn"></button>
     </div>
 
     <div id="footer">© <span>JARVIS</span> — Design by YK</div>
@@ -149,7 +153,6 @@
     const history = document.getElementById("history");
     let exchanges = [];
 
-    // 🔗 Webhook N8N
     const WEBHOOK_URL = "https://n8n.srv846378.hstgr.cloud/webhook/77a6a624-93e6-463e-a1f4-5185239570e2";
 
     async function sendToJarvis(message) {
@@ -198,8 +201,12 @@
     });
 
     input.addEventListener("keypress", e => {
-      if (e.key === "Enter") btn.click();
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        btn.click();
+      }
     });
   </script>
 </body>
 </html>
+     
